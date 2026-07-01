@@ -135,6 +135,32 @@ def generate_launch_description():
             default_value="true",
             description="Launch RViz?",
         ),
+        # OnRobot RG2 gripper integration. Defaults keep the gripper on fake
+        # hardware so this launch stays fully virtual/testable without the
+        # OnRobot Compute Box. Set onrobot_use_fake_hardware:=false to drive the
+        # physical gripper (requires the Compute Box reachable at the address
+        # below).
+        DeclareLaunchArgument(
+            "onrobot_use_fake_hardware",
+            default_value="true",
+            description="Use fake hardware for the RG2 gripper?",
+        ),
+        DeclareLaunchArgument(
+            "onrobot_connection_type",
+            default_value="tcp",
+            description="RG2 connection type (tcp for Compute Box, serial for UR Tool I/O).",
+            choices=["serial", "tcp"],
+        ),
+        DeclareLaunchArgument(
+            "onrobot_ip_address",
+            default_value="192.168.1.1",
+            description="RG2 Compute Box IP address (tcp connection only).",
+        ),
+        DeclareLaunchArgument(
+            "onrobot_port",
+            default_value="502",
+            description="RG2 Compute Box port (tcp connection only).",
+        ),
     ]
 
     update_rate = str(read_update_rate())  # get update_rate from yaml
@@ -164,6 +190,14 @@ def generate_launch_description():
             LaunchConfiguration("mode"),
             " update_rate:=",
             update_rate,
+            " onrobot_use_fake_hardware:=",
+            LaunchConfiguration("onrobot_use_fake_hardware"),
+            " onrobot_connection_type:=",
+            LaunchConfiguration("onrobot_connection_type"),
+            " onrobot_ip_address:=",
+            LaunchConfiguration("onrobot_ip_address"),
+            " onrobot_port:=",
+            LaunchConfiguration("onrobot_port"),
         ]
     )
 
@@ -176,7 +210,16 @@ def generate_launch_description():
                 "config",
                 "dsr_controller2.yaml",
             ]
-        )
+        ),
+        # CHANGE: layer the RG2 finger_width_controller onto the same
+        # controller_manager so the gripper shares the Doosan CM
+        PathJoinSubstitution(
+            [
+                FindPackageShare("pmp_a0509_moveit_config"),
+                "config",
+                "gripper_controllers.yaml",
+            ]
+        ),
     ]
 
     # CHANGE: hardcode model a0509
@@ -206,7 +249,10 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         namespace=LaunchConfiguration("name"),
-        parameters=[robot_description, robot_controllers],
+        # NOTE: each controller param file must be a separate element in
+        # `parameters`. Nesting them in one sub-list makes launch_ros join the
+        # paths into a single (invalid) string, so spread robot_controllers.
+        parameters=[robot_description, *robot_controllers],
         output="both",
         arguments=[
             "--ros-args",
@@ -245,6 +291,18 @@ def generate_launch_description():
         namespace=LaunchConfiguration("name"),
         arguments=[
             "dsr_moveit_controller",
+            "-c",
+            "controller_manager",
+        ],
+    )
+
+    # CHANGE: spawn the RG2 finger_width_controller on the shared CM
+    finger_width_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        namespace=LaunchConfiguration("name"),
+        arguments=[
+            "finger_width_controller",
             "-c",
             "controller_manager",
         ],
@@ -336,6 +394,7 @@ def generate_launch_description():
         delay_rviz_after_joint_state_broadcaster_spawner,
         joint_state_broadcaster_spawner,
         dsr_moveit_controller_spawner,
+        finger_width_controller_spawner,
         control_node,
         zed_wrapper,
         enable_zed_services,

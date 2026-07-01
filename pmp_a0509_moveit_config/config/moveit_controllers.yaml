@@ -10,6 +10,7 @@ moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControll
 moveit_simple_controller_manager:
   controller_names:
     - dsr_moveit_controller
+    - finger_width_controller
 
   dsr_moveit_controller:
     action_ns: follow_joint_trajectory
@@ -22,3 +23,12 @@ moveit_simple_controller_manager:
       - joint_4
       - joint_5
       - joint_6
+
+  # RG2 gripper, driven via a GripperCommand action provided by
+  # position_controllers/GripperActionController (~/gripper_cmd).
+  finger_width_controller:
+    action_ns: gripper_cmd
+    type: GripperCommand
+    default: true
+    joints:
+      - finger_width

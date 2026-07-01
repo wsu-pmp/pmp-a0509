@@ -10,11 +10,33 @@
   <xacro:arg name="camera_model" default="zed2i" />
   <xacro:include filename="$(find zed_wrapper)/urdf/zed_descr.urdf.xacro" />
 
+  <!-- rg2_description for the OnRobot RG2 -->
+  <xacro:arg name="onrobot_prefix" default="" />
+  <xacro:arg name="onrobot_use_fake_hardware" default="false" />
+  <xacro:arg name="onrobot_ip_address" default="192.168.1.1" />
+  <xacro:arg name="onrobot_port" default="502" />
+  <xacro:arg name="onrobot_poll_rate_hz" default="20.0" />
+  <xacro:include filename="$(find rg2_description)/urdf/rg2_macro.xacro"/>
+
   <!-- join zed_camera_link (threaded screw hole) directly to link_6 -->
   <!-- simulated 3d printed bracket with origin offset (rough estimation) -->
   <joint name="camera_mount" type="fixed">
     <origin xyz="0 -0.07 -0.01" rpy="0 -1.57 1.57" />
     <parent link="link_6" />
     <child link="zed_camera_link" />
+  </joint>
+
+  <!-- join RG2 to link_6 -->
+  <xacro:rg2
+    prefix="$(arg onrobot_prefix)"
+    use_fake_hardware="$(arg onrobot_use_fake_hardware)"
+    ip_address="$(arg onrobot_ip_address)"
+    port="$(arg onrobot_port)"
+    poll_rate_hz="$(arg onrobot_poll_rate_hz)"/>
+
+  <joint name="gripper_mount" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 -1.57079632679"/>
+    <parent link="link_6" />
+    <child link="$(arg onrobot_prefix)onrobot_base_link" />
   </joint>
 </robot>

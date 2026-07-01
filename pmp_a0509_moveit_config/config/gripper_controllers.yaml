@@ -1,0 +1,23 @@
+# ros2_control configuration for the OnRobot RG2 gripper.
+#
+# layered on top of the Doosan dsr_controller2.yaml and loaded by the same
+# (single) controller_manager in start.launch.py. adds only the gripper
+# controller; it deliberately does not redeclare controller_manager update_rate
+# or any Doosan controllers so it merges cleanly with the Doosan config
+#
+# GripperActionController with single actuated prismatic finger_width` joint
+# (0..0.110m); all other gripper joints mimic it
+/**:
+  controller_manager:
+    ros__parameters:
+      finger_width_controller:
+        type: position_controllers/GripperActionController
+
+  finger_width_controller:
+    ros__parameters:
+      joint: finger_width
+      goal_tolerance: 0.01      
+      allow_stalling: true # allow grasps that cannot fully close to still succeed
+      stall_velocity_threshold: 0.001
+      stall_timeout: 1.0
+      action_monitor_rate: 20.0
