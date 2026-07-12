@@ -16,8 +16,8 @@
   finger_width_controller:
     ros__parameters:
       joint: finger_width
-      goal_tolerance: 0.01      
-      allow_stalling: true # allow grasps that cannot fully close to still succeed
+      goal_tolerance: 0.003 # measured backlash is ~1.8mm either direction, force-independent
+      allow_stalling: true  # allow grasps that cannot fully close to still succeed
       stall_velocity_threshold: 0.001
       stall_timeout: 1.0
       action_monitor_rate: 20.0
