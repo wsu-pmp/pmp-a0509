@@ -1,0 +1,3 @@
+[submodule "onrobot_rg2"]
+	path = onrobot_rg2
+	url = https://github.com/wsu-pmp/onrobot_rg2.git
