@@ -38,7 +38,7 @@
         <joint name="joint_6" value="0"/>
     </group_state>
     <group_state name="open" group="gripper">
-        <joint name="finger_width" value="0.1003"/>
+        <joint name="finger_width" value="0.1008"/>
     </group_state>
     <group_state name="closed" group="gripper">
         <joint name="finger_width" value="0"/>
