@@ -12,6 +12,17 @@
     ros__parameters:
       finger_width_controller:
         type: position_controllers/GripperActionController
+      finger_width_effort_controller:
+        type: forward_command_controller/ForwardCommandController
+
+  # claims finger_width/max_effort. publishes on ~/commands
+  # (std_msgs/Float64MultiArray, one value). hardware defaults effort to max
+  # force on connect
+  finger_width_effort_controller:
+    ros__parameters:
+      joints:
+        - finger_width
+      interface_name: max_effort
 
   finger_width_controller:
     ros__parameters:

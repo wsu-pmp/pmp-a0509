@@ -354,6 +354,20 @@ def generate_launch_description():
         ],
     )
 
+    # CHANGE: spawn the RG2 max_effort forward_command_controller
+    finger_width_effort_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        namespace=LaunchConfiguration("name"),
+        arguments=[
+            "finger_width_effort_controller",
+            "-c",
+            "controller_manager",
+            "--controller-manager-timeout",
+            "15",
+        ],
+    )
+
     # Moveit2 config
     rviz_node = OpaqueFunction(function=rviz_node_function)
 
@@ -435,6 +449,7 @@ def generate_launch_description():
                 robot_controller_spawner,
                 dsr_moveit_controller_spawner,
                 finger_width_controller_spawner,
+                finger_width_effort_controller_spawner,
             ]
         return [
             LogInfo(
