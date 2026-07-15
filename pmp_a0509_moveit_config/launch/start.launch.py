@@ -1,5 +1,5 @@
 # Modified from
-# https://raw.githubusercontent.com/DoosanRobotics/doosan-robot2/refs/heads/humble/dsr_moveit2/dsr_moveit_config_a0509/launch/start.launch.py
+# https://raw.githubusercontent.com/DoosanRobotics/doosan-robot2/37cc855b8c860d0367bbe88c6b7e139817724225/dsr_moveit2/dsr_moveit_config_a0509/launch/start.launch.py
 
 import os
 from pathlib import Path
@@ -12,8 +12,10 @@ from launch.actions import (
     DeclareLaunchArgument,
     ExecuteProcess,
     IncludeLaunchDescription,
+    LogInfo,
     OpaqueFunction,
     RegisterEventHandler,
+    Shutdown,
     TimerAction,
 )
 from launch.conditions import IfCondition
@@ -161,6 +163,14 @@ def generate_launch_description():
             default_value="502",
             description="RG2 Compute Box port (tcp connection only).",
         ),
+        DeclareLaunchArgument(
+            "drcf_ready_timeout_sec",
+            default_value="30.0",
+            description="max wait for the drcf endpoint (host:port) to accept "
+            "connections before control_node starts. applies in both "
+            "real and virtual and modes - only mode:=virtual has meaningful "
+            "startup latency",
+        ),
     ]
 
     update_rate = str(read_update_rate())  # get update_rate from yaml
@@ -244,6 +254,26 @@ def generate_launch_description():
         output="screen",
     )
 
+    # CHANGE: gate control_node on the drcf endpoint (host:port) accepting
+    # connections; prevent DRHWInterface throwing if it connects before
+    # emulator starts (mode:=virtual)
+    wait_for_drcf = ExecuteProcess(
+        cmd=[
+            "python3",
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("pmp_a0509_moveit_config"),
+                    "scripts",
+                    "wait_for_tcp_port.py",
+                ]
+            ),
+            LaunchConfiguration("host"),
+            LaunchConfiguration("port"),
+            LaunchConfiguration("drcf_ready_timeout_sec"),
+        ],
+        output="screen",
+    )
+
     # CHANGE: add controller_log_level arg to control_node
     control_node = Node(
         package="controller_manager",
@@ -275,14 +305,26 @@ def generate_launch_description():
         package="controller_manager",
         namespace=LaunchConfiguration("name"),
         executable="spawner",
-        arguments=["joint_state_broadcaster", "-c", "controller_manager"],
+        arguments=[
+            "joint_state_broadcaster",
+            "-c",
+            "controller_manager",
+            "--controller-manager-timeout",
+            "15",
+        ],
     )
 
     robot_controller_spawner = Node(
         package="controller_manager",
         namespace=LaunchConfiguration("name"),
         executable="spawner",
-        arguments=["dsr_controller2", "-c", "controller_manager"],
+        arguments=[
+            "dsr_controller2",
+            "-c",
+            "controller_manager",
+            "--controller-manager-timeout",
+            "15",
+        ],
     )
 
     dsr_moveit_controller_spawner = Node(
@@ -293,6 +335,8 @@ def generate_launch_description():
             "dsr_moveit_controller",
             "-c",
             "controller_manager",
+            "--controller-manager-timeout",
+            "15",
         ],
     )
 
@@ -305,6 +349,8 @@ def generate_launch_description():
             "finger_width_controller",
             "-c",
             "controller_manager",
+            "--controller-manager-timeout",
+            "15",
         ],
     )
 
@@ -378,6 +424,34 @@ def generate_launch_description():
         )
     )
 
+    # CHANGE: only start control_node and the controller_manager-dependent
+    # spawners once the drcf endpoint is confirmed reachable; on timeout,
+    # abort launch
+    def on_wait_for_drcf_exit(event, context):
+        if event.returncode == 0:
+            return [
+                control_node,
+                joint_state_broadcaster_spawner,
+                robot_controller_spawner,
+                dsr_moveit_controller_spawner,
+                finger_width_controller_spawner,
+            ]
+        return [
+            LogInfo(
+                msg="drcf endpoint did not become reachable within "
+                "drcf_ready_timeout_sec; aborting bringup, control_node was "
+                "never started"
+            ),
+            Shutdown(reason="drcf endpoint unreachable"),
+        ]
+
+    start_control_node_after_drcf_ready = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=wait_for_drcf,
+            on_exit=on_wait_for_drcf_exit,
+        )
+    )
+
     # # Delay start of robot_controller after `joint_state_broadcaster`
     # delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
     #     event_handler=OnProcessExit(
@@ -390,12 +464,9 @@ def generate_launch_description():
     nodes = [
         run_emulator_node,
         robot_state_pub_node,
-        robot_controller_spawner,
+        wait_for_drcf,
         delay_rviz_after_joint_state_broadcaster_spawner,
-        joint_state_broadcaster_spawner,
-        dsr_moveit_controller_spawner,
-        finger_width_controller_spawner,
-        control_node,
+        start_control_node_after_drcf_ready,
         zed_wrapper,
         enable_zed_services,
     ]

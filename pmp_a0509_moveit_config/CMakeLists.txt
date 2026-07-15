@@ -14,3 +14,7 @@ endif()
 
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 install(FILES .setup_assistant DESTINATION share/${PROJECT_NAME})
+
+install(
+  PROGRAMS scripts/wait_for_tcp_port.py
+  DESTINATION share/${PROJECT_NAME}/scripts)
