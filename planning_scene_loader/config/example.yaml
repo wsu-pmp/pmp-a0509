@@ -1,0 +1,49 @@
+variables:
+  - FRAME_WORLD:  &FRAME_WORLD  world
+  - COLOR_ORANGE: &COLOR_ORANGE [0.90, 0.62, 0.00, 0.5]
+  - COLOR_BLUE:   &COLOR_BLUE   [0.1, 0.1, 0.9, 0.5]
+
+shapes:
+  - name: "example_box"
+    type: "box"
+    frame_id: *FRAME_WORLD
+    position: [0.5, 0.5, 1.0]
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    dimensions: [0.2, 0.2, 0.2]
+    attached_link: *FRAME_WORLD
+    color: *COLOR_ORANGE
+
+  - name: "example_sphere"
+    type: "sphere"
+    frame_id: *FRAME_WORLD
+    position: [-0.5, 0.5, 1.0]
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    radius: 0.1
+    attached_link: *FRAME_WORLD
+    color: *COLOR_ORANGE
+
+  - name: "example_cylinder"
+    type: "cylinder"
+    frame_id: *FRAME_WORLD
+    position: [0.5, -0.5, 0.1]
+    orientation: [0.7071, 0.0, 0.0, 0.7071]
+    height: 0.5
+    radius: 0.2
+    color: *COLOR_BLUE
+
+  - name: "example_cone"
+    type: "cone"
+    frame_id: *FRAME_WORLD
+    position: [-0.5, -0.5, 0.1]
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    height: 0.25
+    radius: 0.1
+    color: *COLOR_BLUE
+
+  - name: "example_plane"
+    type: "box"
+    frame_id: *FRAME_WORLD
+    position: [1.0, 0.0, 0.5]
+    orientation: [0.7071, 0.0, 0.7071, 0.0]
+    dimensions: [1.0, 1.5, 0.0005]
+    attached_link: *FRAME_WORLD
