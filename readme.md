@@ -6,7 +6,7 @@ Robot description and MoveIt config packages for Patient Mobility Project using 
 ## Package Dependencies
 - [doosan-robot2](https://github.com/DoosanRobotics/doosan-robot2) (**branch**: `humble` **commit**: [`37cc855`](https://github.com/DoosanRobotics/doosan-robot2/tree/37cc855b8c860d0367bbe88c6b7e139817724225))
 - [zed-ros2-wrapper](https://github.com/stereolabs/zed-ros2-wrapper) (**branch**: `master` **commit**: [`a66e227`](https://github.com/stereolabs/zed-ros2-wrapper/tree/a66e227e290fb26b9e21b0f45aedcbf93ace52b9))
-- [zed-ros2-interfaces](https://github.com/stereolabs/zed-ros2-interfaces) (**branch**: `humble` **commit**: [`2011ca1`](https://github.com/stereolabs/zed-ros2-interfaces/tree/2011ca191fcc142bbe52039b828ef3625fb290a6))
+- [zed-ros2-interfaces](https://github.com/stereolabs/zed-ros2-interfaces) (**branch**: `master` **commit**: [`efd12ae`](https://github.com/stereolabs/zed-ros2-interfaces/tree/efd12ae97dbb7e313c2e909698a0664396f0069a))
 
 
 ## Dev Setup
