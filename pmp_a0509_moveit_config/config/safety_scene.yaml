@@ -1,0 +1,25 @@
+# one-shot safety collision objects for the a0509 workspace. config-driven
+# failsafe geometry (loaded once via /apply_planning_scene, is_diff=true, ADD)
+
+variables:
+  - BASE_LINK: &BASE_LINK base_link
+
+shapes:
+  # robot table
+  - name: "table_top"
+    type: "box"
+    frame_id: *BASE_LINK
+    position: [0.56, 0.38, -0.01]    # -Z offset to prevent collision with base_link
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    dimensions: [1.360, 0.960, 0.005]
+    attached_link: *BASE_LINK
+
+  # neighbouring a0509
+  - name: "second_arm"
+    type: "cylinder"
+    frame_id: *BASE_LINK
+    position: [0.76, 0.0, 0.45]
+    orientation: [0.0, 0.0, 0.0, 1.0]
+    height: 0.9
+    radius: 0.25
+    attached_link: *BASE_LINK
