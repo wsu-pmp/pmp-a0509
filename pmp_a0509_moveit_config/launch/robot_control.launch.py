@@ -3,8 +3,12 @@
 # endpoint being reachable. vendor-combined by necessity: arm and gripper
 # share one CM, so they cannot be split into per-vendor launches.
 #
-# robot_description is taken from the /robot_description topic (published by
+# robot_description is taken from the robot_description topic (published by
 # rsp.launch.py), so this launch does not recompute the xacro.
+#
+# applies `namespace` to its own nodes instead of inheriting a PushRosNamespace
+# group from start.launch.py, since OnProcessExit handler and returned actions
+# execute after the GroupAction's scope has popped
 
 from launch import LaunchDescription
 from launch.actions import (
@@ -22,7 +26,12 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     args = [
-        DeclareLaunchArgument("name", default_value="", description="NAME_SPACE"),
+        DeclareLaunchArgument(
+            "namespace",
+            default_value="",
+            description="instance namespace for control_node and the spawners; "
+            "must match the rest of the stack (see start.launch.py)",
+        ),
         DeclareLaunchArgument(
             "host", default_value="127.0.0.1", description="ROBOT_IP (drcf endpoint)"
         ),
@@ -85,9 +94,10 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        namespace=LaunchConfiguration("name"),
-        # robot_description comes from rsp's latched /robot_description topic;
-        # remap the node-relative subscription onto it
+        namespace=LaunchConfiguration("namespace"),
+        # robot_description comes from rsp's latched robot_description topic;
+        # remap the node-relative subscription onto it - both are relative,
+        # this resolves inside whatever namespace the stack was pushed into
         remappings=[("~/robot_description", "robot_description")],
         parameters=[*robot_controllers],
         output="both",
@@ -101,8 +111,8 @@ def generate_launch_description():
     def spawner(controller):
         return Node(
             package="controller_manager",
-            namespace=LaunchConfiguration("name"),
             executable="spawner",
+            namespace=LaunchConfiguration("namespace"),
             arguments=[
                 controller,
                 "-c",
