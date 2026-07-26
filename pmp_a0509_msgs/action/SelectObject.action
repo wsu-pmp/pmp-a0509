@@ -1,0 +1,10 @@
+# select a detected object as the manipulation target by its zed tracking id
+# (label_id). the manager promotes it to a stable grasp_target collision object
+# and freezes the bridge for that id.
+int32 object_id
+---
+bool success
+string collision_object_id
+string message
+---
+string status

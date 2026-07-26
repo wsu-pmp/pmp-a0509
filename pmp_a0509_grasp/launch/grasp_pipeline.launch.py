@@ -1,10 +1,10 @@
 # grasp pipeline: perception detections -> planning-scene target -> (future) MTC
-# pick. runs the ZED detection bridge. consumes the ZED sensor by topic
-# (perception is composed at the bringup layer)
+# pick. runs the ZED detection bridge and the object selection manager. consumes
+# the ZED sensor by topic (perception is composed at the bringup layer)
 #
 # takes no namespace of its own - bringup.launch.py wraps this in the stack's
-# PushRosNamespace group, which is what points its planning_scene topics
-# at the matching move_group.
+# PushRosNamespace group, which is what points its planning_scene topics and
+# get_planning_scene client (all relative) at the matching move_group.
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -27,8 +27,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "object_id_prefix",
             default_value="zed_object_",
-            description="collision-object id prefix used when publishing "
-            "collision objects into the planning scene",
+            description="collision-object id prefix shared by the bridge and manager",
         ),
     ]
 
@@ -49,4 +48,12 @@ def generate_launch_description():
         ],
     )
 
-    return LaunchDescription(args + [bridge])
+    manager = Node(
+        package="pmp_a0509_grasp",
+        executable="object_selection_manager",
+        name="object_selection_manager",
+        output="screen",
+        parameters=[{"object_id_prefix": object_id_prefix}],
+    )
+
+    return LaunchDescription(args + [bridge, manager])

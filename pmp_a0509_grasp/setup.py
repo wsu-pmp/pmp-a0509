@@ -23,6 +23,8 @@ setup(
     entry_points={
         "console_scripts": [
             "zed_object_bridge = pmp_a0509_grasp.zed_object_bridge_node:main",
+            "object_selection_manager = "
+            "pmp_a0509_grasp.object_selection_manager_node:main",
         ],
     },
 )
