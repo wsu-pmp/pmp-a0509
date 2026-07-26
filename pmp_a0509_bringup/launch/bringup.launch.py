@@ -47,6 +47,7 @@ def generate_launch_description():
         DeclareLaunchArgument("zed_camera_model", default_value="zed2i"),
         # composition
         DeclareLaunchArgument("launch_rviz", default_value="true"),
+        DeclareLaunchArgument("grasp_enabled", default_value="true"),
         DeclareLaunchArgument("drcf_ready_timeout_sec", default_value="30.0"),
     ]
 
@@ -90,6 +91,13 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration("zed_enabled")),
     )
 
+    grasp = _include(
+        "pmp_a0509_grasp",
+        "grasp_pipeline.launch.py",
+        {"camera_name": zed_camera_name},
+        condition=IfCondition(LaunchConfiguration("grasp_enabled")),
+    )
+
     # one-shot safety collision objects; sequences itself via wait_for_service on
     # apply_planning_scene, so it needs no ordering relative to move_group. its
     # service client is relative (see planning_scene_loader_node.py) - namespace
@@ -105,15 +113,16 @@ def generate_launch_description():
         parameters=[{"config_file": safety_scene}],
     )
 
-    # scene-loader node need the same namespace and TF tree as the robot stack.
-    # start.launch.py pushes its own group. these get a sibling group with the same
-    # values rather than nesting inside it (nesting would double the namespace).
-    # ZED stays outside both.
+    # grasp/scene-loader nodes need the same namespace and TF tree as the robot
+    # stack. start.launch.py pushes its own group. these get a sibling group with
+    # the same values rather than nesting inside it (nesting would double the
+    # namespace). ZED stays outside both.
     stack_consumers = GroupAction(
         [
             PushRosNamespace(namespace),
             SetRemap("/tf", "tf"),
             SetRemap("/tf_static", "tf_static"),
+            grasp,
             safety_scene_loader,
         ]
     )
