@@ -12,6 +12,11 @@
     <group name="manipulator">
         <chain base_link="base_link" tip_link="link_6"/>
     </group>
+    <!--Same six joints as `manipulator`, tipped at gripper_tcp instead of link_6.
+        onrobot_base_link -> gripper_tcp is a fixed transform - adds no DOF -->
+    <group name="manipulator_tcp">
+        <chain base_link="base_link" tip_link="gripper_tcp"/>
+    </group>
     <group name="gripper">
         <link name="onrobot_base_link"/>
         <link name="left_outer_knuckle"/>
@@ -24,12 +29,16 @@
         <link name="right_finger_tip"/>
         <joint name="finger_width"/>
     </group>
-    <group name="arm_gripper">
-        <group name="manipulator"/>
-        <group name="gripper"/>
-    </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="all-zeros" group="manipulator">
+        <joint name="joint_1" value="0"/>
+        <joint name="joint_2" value="0"/>
+        <joint name="joint_3" value="0"/>
+        <joint name="joint_4" value="0"/>
+        <joint name="joint_5" value="0"/>
+        <joint name="joint_6" value="0"/>
+    </group_state>
+    <group_state name="all-zeros" group="manipulator_tcp">
         <joint name="joint_1" value="0"/>
         <joint name="joint_2" value="0"/>
         <joint name="joint_3" value="0"/>

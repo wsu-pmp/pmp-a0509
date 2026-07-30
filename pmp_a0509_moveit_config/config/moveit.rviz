@@ -19,6 +19,10 @@ Visualization Manager:
         Loop Animation: true
         State Display Time: 0.05 s
         Trajectory Topic: display_planned_path
+      Planning Request:
+        # without this RViz falls back to the first entry of its alphabetically
+        # sorted group list, i.e. gripper
+        Planning Group: manipulator_tcp
       Planning Scene Topic: monitored_planning_scene
       Robot Description: robot_description
       Scene Geometry:
