@@ -24,6 +24,11 @@ def _launch_setup(context, *args, **kwargs):
     sensor["point_cloud_topic"] = f"{topic_root}/point_cloud/cloud_registered"
     sensor["filtered_cloud_topic"] = f"{topic_root}/filtered_cloud"
 
+    moveit_config.move_group_capabilities["capabilities"] = (
+        "pilz_industrial_motion_planner/MoveGroupSequenceAction "
+        "pilz_industrial_motion_planner/MoveGroupSequenceService"
+    )
+
     return generate_move_group_launch(moveit_config).entities
 
 
