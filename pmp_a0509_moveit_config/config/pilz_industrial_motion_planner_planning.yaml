@@ -2,8 +2,6 @@ planning_plugin: pilz_industrial_motion_planner/CommandPlanner
 request_adapters: ""
 default_planner_config: PTP
 
-cartesian_limits:
-  max_trans_vel: 1.0
-  max_trans_acc: 2.25
-  max_trans_dec: -5.0
-  max_rot_vel: 1.57
+# Cartesian limits live in config/pilz_cartesian_limits.yaml. A cartesian_limits
+# block here would land in the pipeline's own parameter namespace and be ignored -
+# the planner only reads robot_description_planning.cartesian_limits.
