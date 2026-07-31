@@ -164,6 +164,7 @@ manipulator: &manipulator_ompl
     - SPARS
     - SPARStwo
   projection_evaluator: joints(joint_1,joint_2)
+  enforce_constrained_state_space: true
   longest_valid_segment_fraction: 0.005
 
 # manipulator_tcp is the same six joints tipped at gripper_tcp - takes an identical OMPL configuration
